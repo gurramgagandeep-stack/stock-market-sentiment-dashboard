@@ -28,7 +28,7 @@ export function LiveFeedPage() {
 
   useEffect(() => {
     const off = onSentimentUpdate((data: any) => addFeedEvent(data))
-    return off
+    return () => { off() }
   }, [])
 
   const all = [...feedEvents, ...initial]
@@ -131,3 +131,4 @@ export function LiveFeedPage() {
     </div>
   )
 }
+
