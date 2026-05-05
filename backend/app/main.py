@@ -119,3 +119,19 @@ socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
 import sys
 sys.modules[__name__].app = socket_app
 app = socket_app
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+# ── Serve Frontend ────────────────────────────────────────────────────────────
+import os
+from fastapi.staticfiles import StaticFiles
+
+frontend_dist = os.path.join(os.path.dirname(__file__), "../../frontend/dist")
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+
+# Wrap with Socket.IO ASGI
+socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
+app = socket_app
