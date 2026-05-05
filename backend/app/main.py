@@ -108,7 +108,7 @@ async def health():
 import os
 from fastapi.staticfiles import StaticFiles
 
-frontend_dist = os.path.join(os.path.dirname(__file__), "../../frontend/dist")
+frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend_dist")
 if os.path.exists(frontend_dist):
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
 
@@ -128,7 +128,7 @@ import os
 import os
 from fastapi.staticfiles import StaticFiles
 
-frontend_dist = os.path.join(os.path.dirname(__file__), "../../frontend/dist")
+frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend_dist")
 if os.path.exists(frontend_dist):
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
 
