@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -53,3 +54,4 @@ export const getAlerts = () => api.get<AlertItem[]>('/alerts')
 export const acknowledgeAlert = (id: string) => api.patch(`/alerts/${id}/acknowledge`)
 export const searchTickers = (q: string) => api.get<{ ticker: string; company: string }[]>(`/search?q=${q}`)
 export const getOverview = () => api.get<OverviewStats>('/overview')
+

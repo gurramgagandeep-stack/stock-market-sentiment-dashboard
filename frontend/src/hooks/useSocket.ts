@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { useEffect, useRef, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 
@@ -43,3 +44,4 @@ export function useSocket() {
 
   return { socket, subscribeTicker, unsubscribeTicker, onPriceUpdate, onSentimentUpdate, onAggregateUpdate }
 }
+
