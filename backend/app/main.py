@@ -3,10 +3,12 @@ import json
 import random
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 
 import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
 from app.collectors.mock_data import get_mock_price, get_mock_sentiment_event, MOCK_TICKERS
@@ -63,11 +65,9 @@ async def sentiment_broadcast_loop():
             event["id"] = str(random.randint(100000, 999999))
             await sio.emit("sentiment_update", event, room=f"ticker_{ticker}")
             await sio.emit("sentiment_update", event)
-            # Also emit aggregate update
-            score = event["sentiment_score"]
             await sio.emit("aggregate_update", {
                 "ticker": ticker,
-                "score": round(score + random.uniform(-0.05, 0.05), 4),
+                "score": round(event["sentiment_score"] + random.uniform(-0.05, 0.05), 4),
                 "momentum": round(random.uniform(-0.1, 0.1), 4),
                 "timestamp": event["timestamp"],
             })
@@ -105,33 +105,9 @@ async def health():
     return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 # ── Serve Frontend ────────────────────────────────────────────────────────────
-import os
-from fastapi.staticfiles import StaticFiles
-
-frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend_dist")
-if os.path.exists(frontend_dist):
+frontend_dist = Path(__file__).parent.parent / "frontend_dist"
+if frontend_dist.exists():
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
 
-# Wrap with Socket.IO ASGI
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
-
-# Re-export as `app` for uvicorn
-import sys
-sys.modules[__name__].app = socket_app
-app = socket_app
-
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
-
-# ── Serve Frontend ────────────────────────────────────────────────────────────
-import os
-from fastapi.staticfiles import StaticFiles
-
-frontend_dist = os.path.join(os.path.dirname(__file__), "../frontend_dist")
-if os.path.exists(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
-
-# Wrap with Socket.IO ASGI
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
-app = socket_app
+# ── Wrap with Socket.IO ASGI (must be last) ───────────────────────────────────
+app = socketio.ASGIApp(sio, other_asgi_app=app)
